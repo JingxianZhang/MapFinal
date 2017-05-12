@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<style type="text/css">
+
+/* On mouse hover, lighten state color */
+body {
+    font-family: Gill Sans, sans-serif;
+    font-size: 12px; 
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgb(240,190,72);
+}
+.header{
+    position: absolute;
+    float: left;
+    width: 100%;
+    height: 10%;
+    margin-top: 20px;
+    /*background: black;*/
+    /*color: white;*/
+    color: rgb(223, 117, 20);
+    font-family: Gill Sans, sans-serif;
+    font-weight: 600;
+    font-size: 46px; 
+    text-align: center;
+}
+.food{
+    position: absolute;
+    float: left;
+    width: 80%;
+    height: 70%;
+    top: 10%;
+    /*margin: 180px;*/
+/*    margin-top: 20px;
+    margin-left: 10%;*/
+    padding-top: 20px;
+    padding-left: 10%;
+    padding-right: 10%;
+    /*margin: 100px;*/
+} 
+.one_food{
+    position: relative;
+    float: left;
+    left: 25px;
+    width: 220px;
+    height: 220px;
+    margin-left: 50px;
+    margin-right: 50px;
+    margin-top: 15px;
+    margin-bottom: 30px;
+    /*top: 0px;*/
+    border-radius: 200px;
+    background: rgb(240,240,240);
+    box-shadow: 1px 1px 10px #888888;
+}
+.food_pic{
+    position: relative;
+    float: left;
+    width: 220px;
+    height: 220px;
+}
+.next{
+    position: absolute;
+    width: 100%;
+    height: 20%;
+    top: 80%;
+    /*background: green;*/
+}
+.button-next {
+    background: rgb(223, 117, 20); /* this is an orange */
+    color: white;
+    border: none;
+    border-radius: 10px;
+    width: 200px;
+    height: 70px;
+    font-size: 26px;
+    margin: -35px -100px; 
+    position:relative;
+    top:40%; 
+    left:50%;
+    font-family: Gill Sans, sans-serif;
+}
+
+</style>
+</head>
+<body>
+    <div class="header">Select food you love</div>
+    <div class="food">
+        <div class="one_food">
+            <img class="food_pic" id="almond" src="images/almond.png" alt="almond">
+        </div>
+        <div class="one_food">
+            <img class="food_pic" id="blueberry" src="images/blueberry.png" alt="blueberry">
+        </div>
+        <div class="one_food">
+            <img class="food_pic" id="peach" src="images/peach.png" alt="peach">
+        </div>
+        <div class="one_food">
+            <img class="food_pic" id="grapefruit" src="images/grapefruit.png" alt="grapefruit">
+        </div>
+        <div class="one_food">
+            <img class="food_pic" id="watermelon" src="images/watermelon.png" alt="watermelon">
+        </div>
+        <div class="one_food">
+            <img class="food_pic" id="pumpkin" src="images/pumpkin.png" alt="pumpkin">
+        </div>
+    </div>
+    <div class="next">
+        <button class="button-next">Next</button>
+    </div>
+<script type="text/javascript">
+var food_selected = [];
+d3.selectAll(".one_food").on("click",function(){
+    var the_food = d3.select(this).select(".food_pic").attr("id");
+    if(food_selected.indexOf(the_food) == -1){
+        food_selected.push(the_food);
+        d3.select(this).style("border", "5px solid rgba(223, 117, 20, 0.9)")
+            .style("margin-bottom", "25px").style("margin-top", "10px")
+            .style("margin-left", "45px").style("margin-right", "45px");
+    }
+    else{
+        food_selected.splice(food_selected.indexOf(the_food), 1);
+        d3.select(this).style("border", "0px solid rgba(223, 117, 20, 0.9)")
+            .style("margin-bottom", "30px").style("margin-top", "15px")
+            .style("margin-left", "50px").style("margin-right", "50px");
+    }
+//    alert(food_selected);
+});
+d3.select(".button-next").on("click", function(){
+    var par = "";
+    for(var i in food_selected){
+        par += food_selected[i];
+        if(i != food_selected.length-1) par += "&";
+    }
+    var map_url = window.open("./map.html?food=" + par, "_blank");
+    map_url.location;
+});
+</script>
+</body>
+</html>
