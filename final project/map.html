@@ -26,16 +26,36 @@ path:hover {
 /* Style for Custom Tooltip */
 div.tooltip {   
     position: absolute;           
-    text-align: center;           
-    width: 60px;                  
-    height: 28px;                 
-    padding: 2px;             
-    font: 12px sans-serif;        
+    text-align: center;   
+    left: 83px;
+    top: 665px;
+    width: 80px;                     
+    padding: 8px;
+    font-size: 16px;   
+    font-family: Gill Sans, sans-serif;
+    color: #444;
     background: white;   
     border: 0px;      
-    border-radius: 8px;           
+    border-radius: 6px;           
+    pointer-events: none;  
+    display: block;
+}
+div.map_tooltip {   
+    position: absolute;           
+    text-align: center;   
+    left: 300px;
+    top: 400px;
+    width: 200px; 
+    padding: 8px;
+    font-size: 16px;   
+    font-family: Gill Sans, sans-serif;
+    color: #444;
+    background: #fff;   
+    border: 1px solid #333;   
+    border-radius: 5px;           
     pointer-events: none;  
     display: none;
+    z-index: 10000;
 }
         
 
@@ -47,10 +67,20 @@ body {
     height: 100%;
     background: rgb(240,190,72);
 }
-.top_bar{
+.outer {
+    display: table;
     position: relative;
-    width: 100%;
     height: 12%;
+    width: 100%;
+}
+.middle {
+    display: table-cell;
+    vertical-align: middle;
+}
+.top_bar{
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto; 
     /*background: black;*/
 } 
 .one_food{
@@ -62,15 +92,38 @@ body {
     margin-left: 20px;
     margin-right: 20px;
     margin-top: 10px;
-    /*border-radius: 200px;*/
-    /*background: rgb(240,240,240);*/
-    /*box-shadow: 1px 1px 10px #888888;*/
 }
 .food_pic{
     position: relative;
     float: left;
     width: 60px;
     height: 60px;
+}
+#cost{
+}
+.one_cost{
+    position: relative;
+    float: left;
+    left: 41px;
+    width: 60px;
+    height: 30px;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-top: 5px;
+    font-family: Gill Sans, sans-serif;
+    font-size: 20px;
+    color: #444;
+}
+.will_cost{
+    position: relative;
+    float: left;
+    top: -35px;
+    left: -55px;
+    width: 80px;
+    margin-top: 5px;
+    font-family: Gill Sans, sans-serif;
+    font-size: 20px;
+    color: #444;
 }
 .slider{
     position: relative;
@@ -113,9 +166,16 @@ body {
 </style>
 </head>
 <body>
-    <div class="top_bar">
-        <div id="food_list"></div>
-        <div id="cost"></div>
+    <div class="tooltip">Year 2015</div>
+    <div class="map_tooltip"></div>
+    <div class="outer">
+        <div class="inner">
+            <div class="top_bar">
+                <div id="food_list"></div>
+                <div id="cost"></div>
+                <div class="will_cost">Will cost: </div>
+            </div>
+        </div>
     </div>
     <div class="slider">
         <div id="range-slider">
@@ -125,17 +185,24 @@ body {
     <div class="main"></div>
 <script type="text/javascript">
 var food_selected = location.search.substr(1).split("=")[1].split("&");
+var food_cost = new Array(food_selected.length);
+for(var i = 0; i < food_selected.length; i++) food_cost[i] = 1;
 var the_json;
-d3.select(".top_bar").select("#food_list").selectAll(".one_food").data(food_selected)
+d3.select(".top_bar").style("width", 100 * food_selected.length + "px").select("#food_list").selectAll(".one_food").data(food_selected)
         .enter().append("div").attr("class", "one_food")
         .append("img").attr("class", "food_pic").attr("id", function(d){ return d;})
         .attr("src", function(d){ return "images/" + d + ".png";}).attr("alt", function(d){ return d;});
-d3.select(".top_bar").append("div").attr("id", "total_cost").text();
+d3.select(".top_bar").select("#cost").style("width", (100 * food_selected.length) + "px").selectAll(".one_cost").data(food_selected)
+        .enter().append("div").attr("class", "one_cost")
+        .text(function(d, i){
+            return food_cost[i] + "X";
+        });
 $( "#slider-range" ).slider({
     orientation: "vertical",
     min: 2015,
     max: 2095,
     value: 2015,
+    step: 1,
     slide: function(event, ui){
         svg.selectAll("path")
                 .style("fill", function(d) {
@@ -152,7 +219,13 @@ $( "#slider-range" ).slider({
                     return "rgb(213,222,217)";
                 }
         });
+        d3.select(".tooltip").style("top", function(){
+            return ($(".ui-slider-handle").offset().top - 15) + "px";
+        }).text("Year " + ui.value);
     }
+});
+d3.select(".tooltip").style("top", function(){
+    return ($(".ui-slider-handle").offset().top - 25) + "px";
 });
 $(".ui-slider-handle").css({
     left: "-12px",
@@ -213,6 +286,12 @@ d3.csv("data.csv", function(data) {
                 // Grab data value 
                 var dataValue = data[i].visited;
                 var deltaValue = data[i].delta;
+                var almondValue = data[i].almond;
+                var blueberryValue = data[i].blueberry;
+                var peachValue = data[i].peach;
+                var grapefruitValue = data[i].grapefruit;
+                var watermelonValue = data[i].watermelon;
+                var pumpkinValue = data[i].pumpkin;
 
                 // Find the corresponding state inside the GeoJSON
                 for (var j = 0; j < json.features.length; j++)  {
@@ -223,6 +302,12 @@ d3.csv("data.csv", function(data) {
                         // Copy the data value into the JSON
                         json.features[j].properties.visited = dataValue; 
                         json.features[j].properties.delta = deltaValue; 
+                        json.features[j].properties.almond = almondValue;
+                        json.features[j].properties.blueberry = blueberryValue;
+                        json.features[j].properties.peach = peachValue;
+                        json.features[j].properties.grapefruit = grapefruitValue;
+                        json.features[j].properties.watermelon = watermelonValue;
+                        json.features[j].properties.pumpkin = pumpkinValue;
 
                         // Stop looking through the JSON
                         break;
@@ -232,13 +317,13 @@ d3.csv("data.csv", function(data) {
 
         // Bind the data to the SVG and create one path per GeoJSON feature
         svg.selectAll("path")
-                .data(json.features)
-                .enter()
-                .append("path")
-                .attr("d", path)
-                .style("stroke", "#fff")
-                .style("stroke-width", "1")
-                .style("fill", function(d) {
+        .data(json.features)
+        .enter()
+        .append("path")
+        .attr("d", path)
+        .style("stroke", "#fff")
+        .style("stroke-width", "1")
+        .style("fill", function(d) {
 
                 // Get data value
                 var value = d.properties.visited;
@@ -251,6 +336,30 @@ d3.csv("data.csv", function(data) {
                     //If value is undefined…
                     return "rgb(213,222,217)";
                 }
+        })
+        .on("mouseover", function(d){
+            var the_path = $(this);
+            d3.select(".map_tooltip").style("display", "block")
+            .style("top", function(){
+                return (the_path.offset().top - 40) + "px";
+            })
+            .style("left", function(){
+                return (the_path.offset().left - 60) + "px";
+            })
+            .html(function(){
+                var value = d.properties.visited;
+                var delta = d.properties.delta;
+                return "Bee Colonies: " + (value - delta * ($("#slider-range").slider("value") - 2015))
+                + (d.properties.almond == 0? "" : ("<br>" + "Almond: " + d.properties.almond + "%"))
+                + (d.properties.blueberry == 0? "" : ("<br>" + "Blueberry: " + d.properties.blueberry + "%"))
+                + (d.properties.peach == 0? "" : ("<br>" + "Peach: " + d.properties.peach+ "%"))
+                + (d.properties.grapefruit == 0? "" : ("<br>" + "Grapefruit: " + d.properties.grapefruit + "%"))
+                + (d.properties.watermelon == 0? "" : ("<br>" + "Watermelon: " + d.properties.watermelon + "%"))
+                + (d.properties.pumpkin == 0? "" : ("<br>" + "Pumpkin: " + d.properties.pumpkin + "%"));
+            });
+        })
+        .on("mouseout", function(){
+            d3.select(".map_tooltip").style("display", "none").text("");
         });
 
 
