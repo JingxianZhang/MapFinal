@@ -27,7 +27,7 @@ path:hover {
 div.tooltip {   
     position: absolute;           
     text-align: center;   
-    left: 83px;
+    left: 123px;
     top: 665px;
     width: 80px;                     
     padding: 8px;
@@ -99,8 +99,6 @@ body {
     width: 60px;
     height: 60px;
 }
-#cost{
-}
 .one_cost{
     position: relative;
     float: left;
@@ -131,13 +129,45 @@ body {
     height: 88%;
     /*background: green;*/
 }
+.year{
+    position: relative;
+    left: 70px;
+    top: 30px; 
+    width: 50px;
+    height: 30px;
+    font-family: Gill Sans, sans-serif;
+    font-size: 26px;
+    color: #444;
+}
 #slider-range{
     position: relative;
-    left: 50px;
-    top: 110px; 
+    left: 90px;
+    top: 50px; 
     width: 10px;
     height: 450px;
     background: rgb(100,100,100);
+}
+.slider-tick{
+    position: relative;
+    left: 65px;
+    top: -489px; 
+    width: 30px;
+    height: 1px;
+    margin-top: 86.5px;
+    border-style: none;
+    border-bottom: 2px dotted rgb(100,100,100);
+    /*background: rgb(100,100,100);*/
+}
+.slider-tick-label{
+    position: relative;
+    left: 29px;
+    top: -1034px; 
+    width: 30px;
+    height: 3px;
+    margin-top: 86.5px;
+    font-family: Gill Sans, sans-serif;
+    font-size: 16px;
+    color: #444;
 }
 .ui-slider-handle{
     left: -10px;
@@ -153,6 +183,12 @@ body {
     height: 88%;
     /*background: cyan;*/
 }
+.state_food{
+    position: absolute;
+    float: left;
+    width: 40px;
+    height: 40px;
+}
 /* Legend Position Style */
 .legend {
     font-family: Gill Sans, sans-serif;
@@ -166,7 +202,7 @@ body {
 </style>
 </head>
 <body>
-    <div class="tooltip">Year 2015</div>
+    <div class="tooltip">Year 2016</div>
     <div class="map_tooltip"></div>
     <div class="outer">
         <div class="inner">
@@ -178,12 +214,32 @@ body {
         </div>
     </div>
     <div class="slider">
+        <div class="year">Year</div>
         <div id="range-slider">
             <div id="slider-range"></div>
         </div>
+        <div class="slider-tick"></div>
+        <div class="slider-tick"></div>
+        <div class="slider-tick"></div>
+        <div class="slider-tick"></div>
+        <div class="slider-tick"></div>
+        <div class="slider-tick"></div>
+        <div class="slider-tick-label">2050</div>
+        <div class="slider-tick-label">2043</div>
+        <div class="slider-tick-label">2037</div>
+        <div class="slider-tick-label">2030</div>
+        <div class="slider-tick-label">2023</div>
+        <div class="slider-tick-label">2016</div>
     </div>
     <div class="main"></div>
 <script type="text/javascript">
+var price_decrease = {
+                almond: 0.18,
+                blueberry: 0.12,
+                peach: 0.08,
+                grapefruit: 0.03,
+                watermelon: 0.02,
+                pumpkin: 0.23};
 var food_selected = location.search.substr(1).split("=")[1].split("&");
 var food_cost = new Array(food_selected.length);
 for(var i = 0; i < food_selected.length; i++) food_cost[i] = 1;
@@ -193,27 +249,41 @@ d3.select(".top_bar").style("width", 100 * food_selected.length + "px").select("
         .append("img").attr("class", "food_pic").attr("id", function(d){ return d;})
         .attr("src", function(d){ return "images/" + d + ".png";}).attr("alt", function(d){ return d;});
 d3.select(".top_bar").select("#cost").style("width", (100 * food_selected.length) + "px").selectAll(".one_cost").data(food_selected)
-        .enter().append("div").attr("class", "one_cost")
+        .enter().append("div").attr("class", "one_cost").attr("id", function(d){ return d;})
         .text(function(d, i){
             return food_cost[i] + "X";
         });
 $( "#slider-range" ).slider({
     orientation: "vertical",
-    min: 2015,
-    max: 2095,
-    value: 2015,
+    min: 2016,
+    max: 2050,
+    value: 2016,
     step: 1,
     slide: function(event, ui){
         svg.selectAll("path")
-                .style("fill", function(d) {
-
+           .style("fill", function(d) {
+                
                 // Get data value
                 var the_value = d.properties.visited;
                 var delta = d.properties.delta;
 
                 if (the_value) {
+                    if(the_value != 0 && (the_value - delta * the_value * (ui.value - 2016))<=0){
+                        d3.selectAll("#" + d.properties.name + ".almond").attr("src", "images/" + "almond_dark.png");
+                        d3.selectAll("#" + d.properties.name + ".blueberry").attr("src", "images/" + "blueberry_dark.png");
+                        d3.selectAll("#" + d.properties.name + ".grapefruit").attr("src", "images/" + "grapefruit_dark.png");
+                        d3.selectAll("#" + d.properties.name + ".pumpkin").attr("src", "images/" + "pumpkin_dark.png");
+                        d3.selectAll("#" + d.properties.name + ".watermelon").attr("src", "images/" + "watermelon_dark.png");
+                    }
+                    else if(the_value != 0 && (the_value - delta * the_value * (ui.value - 2016))>0){
+                        d3.selectAll("#" + d.properties.name + ".almond").attr("src", "images/" + "almond.png");
+                        d3.selectAll("#" + d.properties.name + ".blueberry").attr("src", "images/" + "blueberry.png");
+                        d3.selectAll("#" + d.properties.name + ".grapefruit").attr("src", "images/" + "grapefruit.png");
+                        d3.selectAll("#" + d.properties.name + ".pumpkin").attr("src", "images/" + "pumpkin.png");
+                        d3.selectAll("#" + d.properties.name + ".watermelon").attr("src", "images/" + "watermelon.png");
+                    }
                     //If value exists…
-                    return color(((the_value - delta * (ui.value - 2015))/maximum)>=0? ((the_value - delta * (ui.value - 2015))/maximum) : 0);
+                    return color(((the_value - delta * the_value * (ui.value - 2016))/maximum)>=0? ((the_value - delta * the_value * (ui.value - 2016))/maximum) : 0);
                 } else {
                     //If value is undefined…
                     return "rgb(213,222,217)";
@@ -222,6 +292,9 @@ $( "#slider-range" ).slider({
         d3.select(".tooltip").style("top", function(){
             return ($(".ui-slider-handle").offset().top - 15) + "px";
         }).text("Year " + ui.value);
+        d3.selectAll(".one_cost").text(function(d, i){
+                return (Math.pow((food_cost[i] + price_decrease[d3.select(this).attr("id")]), (ui.value - 2016))).toFixed(1) + "X";
+        });
     }
 });
 d3.select(".tooltip").style("top", function(){
@@ -252,7 +325,7 @@ var path = d3.geo.path()               // path generator that will convert GeoJS
 // Define linear scale for output
 //var color = d3.scale.linear()
 //              .range(["rgb(213,222,217)","rgb(69,173,168)","rgb(84,36,55)","rgb(217,91,67)"]);
-var minimum = 0, maximum = 100;
+var minimum = 0, maximum = 210;
 var minimumColor = "#d5ded9", maximumColor = "#d95b43";
 var color = d3.scale.linear().domain([minimum, maximum]).range([minimumColor, maximumColor]);
 
@@ -271,7 +344,7 @@ var div = d3.select("body").select(".main")
             .style("opacity", 0);
 
 // Load in my states data!
-d3.csv("data.csv", function(data) {
+d3.csv("new_data.csv", function(data) {
     color.domain([0,1,2,3]); // setting the range of the input data
 
     // Load GeoJSON data and merge with states data
@@ -302,12 +375,12 @@ d3.csv("data.csv", function(data) {
                         // Copy the data value into the JSON
                         json.features[j].properties.visited = dataValue; 
                         json.features[j].properties.delta = deltaValue; 
-                        json.features[j].properties.almond = almondValue;
-                        json.features[j].properties.blueberry = blueberryValue;
-                        json.features[j].properties.peach = peachValue;
-                        json.features[j].properties.grapefruit = grapefruitValue;
-                        json.features[j].properties.watermelon = watermelonValue;
-                        json.features[j].properties.pumpkin = pumpkinValue;
+                        if(food_selected.indexOf("almond") != -1) json.features[j].properties.almond = almondValue;
+                        if(food_selected.indexOf("blueberry") != -1) json.features[j].properties.blueberry = blueberryValue;
+                        if(food_selected.indexOf("peach") != -1) json.features[j].properties.peach = peachValue;
+                        if(food_selected.indexOf("grapefruit") != -1) json.features[j].properties.grapefruit = grapefruitValue;
+                        if(food_selected.indexOf("watermelon") != -1) json.features[j].properties.watermelon = watermelonValue;
+                        if(food_selected.indexOf("pumpkin") != -1) json.features[j].properties.pumpkin = pumpkinValue;
 
                         // Stop looking through the JSON
                         break;
@@ -324,7 +397,89 @@ d3.csv("data.csv", function(data) {
         .style("stroke", "#fff")
         .style("stroke-width", "1")
         .style("fill", function(d) {
-
+                //put food icon on the state
+                var the_path = $(this);
+                if(d.properties.name != "Puerto Rico" && d.properties.name != "District of Columbia"){
+                    if(d.properties.blueberry && d.properties.blueberry != 0){
+                        d3.select(".main").append("img").attr("class", "state_food blueberry").attr("id", d.properties.name)
+                            .attr("src","images/blueberry.png")
+                            .style("top", function(){
+                                if(d.properties.name == "Washington") return (the_path.offset().top - 95) + "px";
+                                if(d.properties.name == "Oregon") return (the_path.offset().top - 80) + "px";
+                                if(d.properties.name == "Michigan") return (the_path.offset().top - 50) + "px";
+                                return (the_path.offset().top - 75) + "px";
+                            })
+                            .style("left", function(){
+                                if(d.properties.name == "Washington") return (the_path.offset().left - 130) + "px";
+                                if(d.properties.name == "Oregon") return (the_path.offset().left - 125) + "px";
+                                if(d.properties.name == "Michigan") return (the_path.offset().left - 105) + "px";
+                                return (the_path.offset().left - 140) + "px";
+                            });
+                    }
+                    if(d.properties.almond && d.properties.almond != 0){
+                        d3.select(".main").append("img").attr("class", "state_food almond").attr("id", d.properties.name)
+                            .attr("src","images/almond.png")
+                            .style("top", function(){
+                                return (the_path.offset().top - 90) + "px";
+                            })
+                            .style("left", function(){
+                                return (the_path.offset().left - 150) + "px";
+                            });
+                    }
+                    if(d.properties.peach && d.properties.peach != 0){
+                        d3.select(".main").append("img").attr("class", "state_food peach").attr("id", d.properties.name)
+                            .attr("src","images/peach.png")
+                            .style("top", function(){
+                                return (the_path.offset().top + 20) + "px";
+                            })
+                            .style("left", function(){
+                                return (the_path.offset().left - 105) + "px";
+                            });
+                    }
+                    if(d.properties.grapefruit && d.properties.grapefruit != 0){
+                        d3.select(".main").append("img").attr("class", "state_food grapefruit").attr("id", d.properties.name)
+                            .attr("src","images/grapefruit.png")
+                            .style("top", function(){
+                                if(d.properties.name == "Texas") return (the_path.offset().top - 45) + "px";
+                                if(d.properties.name == "Florida") return (the_path.offset().top - 95) + "px";
+                                return (the_path.offset().top - 50) + "px";
+                            })
+                            .style("left", function(){
+                                if(d.properties.name == "Texas") return (the_path.offset().left - 95) + "px";
+                                if(d.properties.name == "Florida") return (the_path.offset().left - 90) + "px";
+                                return (the_path.offset().left - 147) + "px";
+                            });
+                    }
+                    if(d.properties.watermelon && d.properties.watermelon != 0){
+                        d3.select(".main").append("img").attr("class", "state_food watermelon").attr("id", d.properties.name)
+                            .attr("src","images/watermelon.png")
+                            .style("top", function(){
+                                if(d.properties.name == "Texas") return (the_path.offset().top - 45) + "px";
+                                if(d.properties.name == "Florida") return (the_path.offset().top - 67) + "px";
+                                if(d.properties.name == "Georgia") return (the_path.offset().top - 102) + "px";
+                                if(d.properties.name == "California") return (the_path.offset().top - 17) + "px";
+                                return (the_path.offset().top - 15) + "px";
+                            })
+                            .style("left", function(){
+                                if(d.properties.name == "Texas") return (the_path.offset().left - 55) + "px";
+                                if(d.properties.name == "Florida") return (the_path.offset().left - 75) + "px";
+                                if(d.properties.name == "Georgia") return (the_path.offset().left - 150) + "px";
+                                if(d.properties.name == "California") return (the_path.offset().left - 129) + "px";
+                                return (the_path.offset().left - 130) + "px";
+                            });
+                    }
+                    if(d.properties.pumpkin && d.properties.pumpkin != 0){
+                        d3.select(".main").append("img").attr("class", "state_food pumpkin").attr("id", d.properties.name)
+                            .attr("src","images/pumpkin.png")
+                            .style("top", function(){
+                                return (the_path.offset().top - 90) + "px";
+                            })
+                            .style("left", function(){
+                                return (the_path.offset().left - 150) + "px";
+                            });
+                    }
+                }
+                
                 // Get data value
                 var value = d.properties.visited;
                 var delta = d.properties.delta;
@@ -349,13 +504,13 @@ d3.csv("data.csv", function(data) {
             .html(function(){
                 var value = d.properties.visited;
                 var delta = d.properties.delta;
-                return "Bee Colonies: " + (value - delta * ($("#slider-range").slider("value") - 2015))
-                + (d.properties.almond == 0? "" : ("<br>" + "Almond: " + d.properties.almond + "%"))
-                + (d.properties.blueberry == 0? "" : ("<br>" + "Blueberry: " + d.properties.blueberry + "%"))
-                + (d.properties.peach == 0? "" : ("<br>" + "Peach: " + d.properties.peach+ "%"))
-                + (d.properties.grapefruit == 0? "" : ("<br>" + "Grapefruit: " + d.properties.grapefruit + "%"))
-                + (d.properties.watermelon == 0? "" : ("<br>" + "Watermelon: " + d.properties.watermelon + "%"))
-                + (d.properties.pumpkin == 0? "" : ("<br>" + "Pumpkin: " + d.properties.pumpkin + "%"));
+                return "Bee Colonies: " + ((value - delta * value * ($("#slider-range").slider("value") - 2016))>=0? (value - delta * value * ($("#slider-range").slider("value") - 2016)):0).toFixed(1) + "K"
+                + (!d.properties.almond||d.properties.almond == 0? "" : ("<br>" + "Almond: " + ((d.properties.almond - delta * d.properties.almond * ($("#slider-range").slider("value") - 2016))>=0? (d.properties.almond - delta * d.properties.almond * ($("#slider-range").slider("value") - 2016)):0).toFixed(1) + "%"))
+                + (!d.properties.blueberry||d.properties.blueberry == 0? "" : ("<br>" + "Blueberry: " + ((d.properties.blueberry - delta * d.properties.blueberry * ($("#slider-range").slider("value") - 2016))>=0? (d.properties.blueberry - delta * d.properties.blueberry * ($("#slider-range").slider("value") - 2016)):0).toFixed(1) + "%"))
+                + (!d.properties.peach||d.properties.peach == 0? "" : ("<br>" + "Peach: " + ((d.properties.peach - delta * d.properties.peach * ($("#slider-range").slider("value") - 2016))>=0? (d.properties.peach - delta * d.properties.peach * ($("#slider-range").slider("value") - 2016)):0).toFixed(1)+ "%"))
+                + (!d.properties.grapefruit||d.properties.grapefruit == 0? "" : ("<br>" + "Grapefruit: " + ((d.properties.grapefruit - delta * d.properties.grapefruit * ($("#slider-range").slider("value") - 2016))>=0? (d.properties.grapefruit - delta * d.properties.grapefruit * ($("#slider-range").slider("value") - 2016)):0).toFixed(1) + "%"))
+                + (!d.properties.watermelon||d.properties.watermelon == 0? "" : ("<br>" + "Watermelon: " + ((d.properties.watermelon - delta * d.properties.watermelon * ($("#slider-range").slider("value") - 2016))>=0? (d.properties.watermelon - delta * d.properties.watermelon * ($("#slider-range").slider("value") - 2016)):0).toFixed(1) + "%"))
+                + (!d.properties.pumpkin|d.properties.pumpkin == 0? "" : ("<br>" + "Pumpkin: " + ((d.properties.pumpkin - delta * d.properties.pumpkin * ($("#slider-range").slider("value") - 2016))>=0?(d.properties.pumpkin - - delta * d.properties.pumpkin * ($("#slider-range").slider("value") - 2016)):0).toFixed(1) + "%"));
             });
         })
         .on("mouseout", function(){
